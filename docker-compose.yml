@@ -4,6 +4,7 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+      target: developer
     ports:
       - "3000:3000"
     volumes:

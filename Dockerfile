@@ -16,5 +16,11 @@ chown -R appuser /app
 USER appuser
 COPY --chown=appuser:appuser . .
 RUN go mod tidy && \
-go install -v golang.org/x/tools/gopls@latest && \
-go install -v github.com/ramya-rao-a/go-outline@latest
+go install github.com/cosmtrek/air@latest && \
+go mod download
+
+RUN go install -v golang.org/x/tools/gopls@latest && \
+go install -v github.com/ramya-rao-a/go-outline@latest 
+# github.com/go-delve/delve/cmd/dlv@latest && \
+# honnef.co/go/tools/cmd/staticcheck@latest && \
+
