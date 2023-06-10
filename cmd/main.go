@@ -6,10 +6,12 @@ import (
 
 	"github.com/gt2rz/micro-auth/internal/routes"
 	"github.com/gt2rz/micro-auth/internal/servers"
+	"github.com/gt2rz/micro-auth/internal/utils"
 )
 
 func init() {
 	fmt.Println("Initializing...")
+	utils.LoadEnvs()
 }
 
 func main() {

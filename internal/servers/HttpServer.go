@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -15,8 +16,15 @@ type HttpServer struct {
 }
 
 func NewHttpServer(ctx context.Context) (*HttpServer, error) {
+
+	if os.Getenv("PORT") == "" {
+		os.Setenv("PORT", ":3000")
+	}
+
+	port := os.Getenv("PORT")
+
 	return &HttpServer{
-		port:   ":3000",
+		port:   port,
 		router: mux.NewRouter(),
 	}, nil
 }
