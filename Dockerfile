@@ -12,7 +12,9 @@ FROM golang:1.20.5-alpine3.18 as developer
 RUN apk update && apk add --no-cache git
 WORKDIR /app
 RUN adduser -D -g '' appuser && \ 
-    chown -R appuser /app
+chown -R appuser /app
 USER appuser
 COPY --chown=appuser:appuser . .
-RUN go mod tidy
+RUN go mod tidy && \
+go install -v golang.org/x/tools/gopls@latest && \
+go install -v github.com/ramya-rao-a/go-outline@latest
