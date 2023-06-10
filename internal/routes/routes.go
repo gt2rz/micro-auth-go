@@ -11,4 +11,7 @@ func InitRoutes(server *servers.HttpServer, router *mux.Router) {
 	fmt.Println("Initializing routes...")
 	// Home routes
 	HomeRoutes(server, router)
+
+	// Auth routes
+	AuthRoutes(server, router)
 }
