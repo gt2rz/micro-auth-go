@@ -1,11 +1,44 @@
 services:
   app:
-    image: app
+    image: auth-go
+    restart: always
     build: 
       context: .
       dockerfile: Dockerfile
-      target: developer
+      target: production
     ports:
       - "3000:3000"
     volumes:
       - .:/app
+    depends_on:
+      - postgres
+    networks:
+      - auth-go-network
+    
+  postgres:
+    image: postgres
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - auth-go-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  auth-go-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

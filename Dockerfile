@@ -12,15 +12,19 @@ FROM golang:1.20.5-alpine3.18 as developer
 RUN apk update && apk add --no-cache git
 WORKDIR /app
 RUN adduser -D -g '' appuser && \ 
-chown -R appuser /app
+  chown -R appuser /app
 USER appuser
 COPY --chown=appuser:appuser . .
-RUN go mod tidy && \
-go install github.com/cosmtrek/air@latest && \
-go mod download
+# RUN go mod tidy && \
+#   go install github.com/cosmtrek/air@latest && \
+#   go mod download
 
-RUN go install -v golang.org/x/tools/gopls@latest && \
-go install -v github.com/ramya-rao-a/go-outline@latest 
+# RUN go install -v golang.org/x/tools/gopls@latest && \
+#   go install -v github.com/ramya-rao-a/go-outline@latest 
 # github.com/go-delve/delve/cmd/dlv@latest && \
 # honnef.co/go/tools/cmd/staticcheck@latest && \
 
+# DATABASES
+FROM postgres as postgres
+COPY ./scripts/postgres/init.sql /docker-entrypoint-initdb.d/
+EXPOSE 5432
