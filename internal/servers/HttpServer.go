@@ -8,21 +8,32 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/gt2rz/micro-auth/internal/database"
 )
 
 type HttpServer struct {
 	port   string
 	router *mux.Router
+	db	 *sql.Db
 }
 
 func NewHttpServer(ctx context.Context) (*HttpServer, error) {
 
+	// Get a database handle.
+	db, err := database.GetDbSqlConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	// Set port server if not set
 	if os.Getenv("PORT") == "" {
 		os.Setenv("PORT", ":3000")
 	}
 
+	// Get port server
 	port := os.Getenv("PORT")
 
+	// Create new server
 	return &HttpServer{
 		port:   port,
 		router: mux.NewRouter(),
