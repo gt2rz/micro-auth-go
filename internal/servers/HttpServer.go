@@ -2,21 +2,26 @@ package servers
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 	"github.com/gt2rz/micro-auth/internal/database"
+	"github.com/gt2rz/micro-auth/internal/repositories"
+	"github.com/rs/cors"
 )
 
+// HttpServer is the struct for the http server
 type HttpServer struct {
-	port   string
-	router *mux.Router
-	db	 *sql.Db
+	port           string
+	router         *mux.Router
+	db             *sql.DB
+	UserRepository repositories.UserRepository
 }
 
+// NewHttpServer creates a new http server
 func NewHttpServer(ctx context.Context) (*HttpServer, error) {
 
 	// Get a database handle.
@@ -33,13 +38,18 @@ func NewHttpServer(ctx context.Context) (*HttpServer, error) {
 	// Get port server
 	port := os.Getenv("PORT")
 
+	userRepository, _ := repositories.NewUserRepository(db)
+
 	// Create new server
 	return &HttpServer{
-		port:   port,
-		router: mux.NewRouter(),
+		port:           port,
+		router:         mux.NewRouter(),
+		db:             db,
+		UserRepository: userRepository,
 	}, nil
 }
 
+// Start starts the http server
 func (server *HttpServer) Start(router func(s *HttpServer, r *mux.Router)) {
 
 	// Add routes to server router

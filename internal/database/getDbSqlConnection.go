@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"microtwo/database/drivers"
 	"os"
+
+	"github.com/gt2rz/micro-auth/internal/constants"
+	"github.com/gt2rz/micro-auth/internal/database/drivers"
 )
 
 var ErrNoDatabaseTypeSpecified = errors.New("no database type specified")
@@ -16,10 +18,10 @@ func GetDbSqlConnection() (*sql.DB, error) {
 	switch os.Getenv("DB_TYPE") {
 	case "postgres":
 		db = drivers.NewPostgresConnection()
-		
+
 	default:
-		fmt.Println(constants.ErrNoDatabaseTypeSpecified.Error())
-		return nil, constants.ErrNoDatabaseTypeSpecified
+		fmt.Println(constants.ErrNotDatabaseTypeSpecified.Error())
+		return nil, constants.ErrNotDatabaseTypeSpecified
 	}
 
 	fmt.Println(constants.ConnectedToDatabaseType + ": " + os.Getenv("DB_TYPE"))
