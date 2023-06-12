@@ -5,13 +5,15 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-      target: production
+      target: developer
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     volumes:
       - .:/app
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     networks:
       - auth-go-network
     
