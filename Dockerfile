@@ -37,5 +37,6 @@ CMD ["air", "-c", ".air.toml"]
 # DATABASES
 #--------------------------------------
 FROM postgres as postgres
-COPY ./scripts/postgres/init.sql /docker-entrypoint-initdb.d/
+COPY ./scripts/postgres/init.sql docker-entrypoint-initdb.d/init.sql
 EXPOSE 5432
+VOLUME /var/lib/postgresql/data
