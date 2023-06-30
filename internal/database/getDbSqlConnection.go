@@ -10,8 +10,6 @@ import (
 	"github.com/gt2rz/micro-auth/internal/database/drivers"
 )
 
-var ErrNoDatabaseTypeSpecified = errors.New("no database type specified")
-
 func GetDbSqlConnection() (*sql.DB, error) {
 	var db *sql.DB
 

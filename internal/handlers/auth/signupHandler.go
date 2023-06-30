@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -30,6 +31,13 @@ func SignupHandler(server *servers.HttpServer) http.HandlerFunc {
 		err := json.NewDecoder(r.Body).Decode(&request)
 		if err != nil {
 			utils.SendHttpResponseError(w, constants.ErrSignupFailed, http.StatusBadRequest)
+			return
+		}
+
+		// Check if the user already exists
+		_, err = server.UserRepository.GetUserByEmail(context.Background(), request.Email)
+		if err != constants.ErrUserNotFound {
+			utils.SendHttpResponseError(w, constants.ErrUserAlreadyExists, http.StatusBadRequest)
 			return
 		}
 
