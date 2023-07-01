@@ -3,24 +3,13 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"fmt"
 	"time"
 
+	"github.com/gt2rz/micro-auth/internal/constants"
 	"github.com/gt2rz/micro-auth/internal/models"
 	"github.com/gt2rz/micro-auth/internal/utils"
 )
-
-// errUserNotSaved is the error returned when a user is not saved
-var errUserNotSaved = errors.New("User not saved")
-
-// errUserNotFound is the error returned when a user is not found
-var errUserNotFound = errors.New("User not found")
-
-// errGenerateRandomString is the error returned when a random string cannot be generated
-var errGenerateRandomString = errors.New("Error generating random string")
-
-// errResetTokenNotSaved is the error returned when a reset token is not saved
-var errResetTokenNotSaved = errors.New("Reset token not saved")
 
 // UserRepository is the interface for the user repository
 type UserRepository interface {
@@ -47,16 +36,16 @@ func (r *UserRepositoryImpl) SaveUser(ctx context.Context, user models.User) err
 	result, err := r.db.ExecContext(ctx, "INSERT INTO users (id, email, password, first_name, last_name, phone, verified, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?,?, ?, ?)", user.Id, user.Email, user.Password, user.Firstname, user.Lastname, user.Phone, user.Verified, user.CreatedAt, user.UpdatedAt)
 
 	if err != nil {
-		return errUserNotSaved
+		return constants.ErrUserNotSaved
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return errUserNotSaved
+		return constants.ErrUserNotSaved
 	}
 
 	if rowsAffected != 1 {
-		return errUserNotSaved
+		return constants.ErrUserNotSaved
 	}
 	return nil
 }
@@ -66,15 +55,42 @@ func (r *UserRepositoryImpl) GetUserByEmail(ctx context.Context, email string) (
 
 	var user = models.User{}
 
-	query := r.db.QueryRowContext(ctx, "SELECT id, email, password, first_name, last_name, phone, verified, created_at, updated_at  FROM users WHERE email=?", email)
-	err := query.Scan(&user.Id, &user.Email, &user.Password, &user.Firstname, &user.Lastname, &user.Phone, &user.Verified, &user.CreatedAt, &user.UpdatedAt)
+	query := `
+		SELECT 
+			id, 
+			email, 
+			password, 
+			firstname, 
+			lastname, 
+			phone, 
+			verified, 
+			status, 
+			created_at, 
+			updated_at 
+		FROM users 
+		WHERE email = $1
+	`
+
+	err := r.db.QueryRowContext(ctx, query, email).Scan(
+		&user.Id,
+		&user.Email,
+		&user.Password,
+		&user.Firstname,
+		&user.Lastname,
+		&user.Phone,
+		&user.Verified,
+		&user.Status,
+		&user.PasswordResetTokenAt,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
 
 	if err == sql.ErrNoRows {
-		return nil, errUserNotFound
+		return nil, constants.ErrUserNotFound
 	}
 
 	if err != nil {
-		return nil, errUserNotFound
+		return nil, constants.ErrGettingUser
 	}
 
 	return &user, nil
@@ -86,21 +102,21 @@ func (r *UserRepositoryImpl) GenerateResetToken(ctx context.Context, id string) 
 	resetTokenAt := time.Now().Add(2 * time.Minute)
 	resetToken, err := utils.GenerateRandomString(64)
 	if err != nil {
-		return "", errGenerateRandomString
+		return "", constants.ErrGenerateRandomString
 	}
 
 	result, err := r.db.ExecContext(ctx, "UPDATE users SET password_reset_token=?, password_reset_token_at=? WHERE id=?", resetToken, resetTokenAt, id)
 	if err != nil {
-		return "", errResetTokenNotSaved
+		return "", constants.ErrResetTokenNotSaved
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return "", errResetTokenNotSaved
+		return "", constants.ErrResetTokenNotSaved
 	}
 
 	if rowsAffected != 1 {
-		return "", errResetTokenNotSaved
+		return "", constants.ErrResetTokenNotSaved
 	}
 
 	return resetToken, nil
@@ -113,11 +129,11 @@ func (r *UserRepositoryImpl) GetUserByResetToken(ctx context.Context, resetToken
 	query := r.db.QueryRowContext(ctx, "SELECT id, email, first_name, password_reset_token_at  FROM users WHERE password_reset_token=?", resetToken)
 	err := query.Scan(&user.Id, &user.Email, &user.Firstname, &user.PasswordResetTokenAt)
 	if err == sql.ErrNoRows {
-		return nil, errUserNotFound
+		return nil, constants.ErrUserNotFound
 	}
 
 	if err != nil {
-		return nil, errUserNotFound
+		return nil, constants.ErrUserNotFound
 	}
 
 	return &user, nil
@@ -137,7 +153,7 @@ func (r *UserRepositoryImpl) UpdatePassword(ctx context.Context, id string, pass
 	}
 
 	if rowsAffected != 1 {
-		return errUserNotSaved
+		return constants.ErrUserNotSaved
 	}
 	return nil
 }
