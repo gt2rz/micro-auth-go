@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	fmt.Println("Initializing...")
+	fmt.Println("Initializing...!")
 }
 
 func main() {
