@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gt2rz/micro-auth/internal/constants"
+	"github.com/gt2rz/micro-auth/internal/models"
 	"github.com/gt2rz/micro-auth/internal/servers"
 	"github.com/gt2rz/micro-auth/internal/utils"
 )
@@ -41,6 +42,21 @@ func SignupHandler(server *servers.HttpServer) http.HandlerFunc {
 			return
 		}
 
+		// Create a new user
+		err = server.UserRepository.SaveUser(context.Background(), models.User{
+			Email:     request.Email,
+			Password:  request.Password,
+			Firstname: request.Firstname,
+			Lastname:  request.Lastname,
+			Phone:     request.Phone,
+		})
+
+		if err != nil {
+			utils.SendHttpResponseError(w, constants.ErrSignupFailed, http.StatusBadRequest)
+			return
+		}
+
+		// Send the response
 		utils.SendHttpResponse(w, SignupResponse{
 			Status:  constants.Success,
 			Id:      1,

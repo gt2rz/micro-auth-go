@@ -32,7 +32,23 @@ func NewUserRepository(db *sql.DB) (*UserRepositoryImpl, error) {
 // SaveUser saves a user to the database
 func (r *UserRepositoryImpl) SaveUser(ctx context.Context, user models.User) error {
 
-	result, err := r.db.ExecContext(ctx, "INSERT INTO users (id, email, password, first_name, last_name, phone, verified, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?,?, ?, ?)", user.Id, user.Email, user.Password, user.Firstname, user.Lastname, user.Phone, user.Verified, user.CreatedAt, user.UpdatedAt)
+	sql := `
+	INSERT INTO users (
+		email, 
+		password, 
+		firstname, 
+		lastname, 
+		phone 
+	) VALUES ($1, $2, $3, $4, $5)
+	`
+
+	result, err := r.db.ExecContext(ctx, sql,
+		user.Email,
+		user.Password,
+		user.Firstname,
+		user.Lastname,
+		user.Phone,
+	)
 
 	if err != nil {
 		return constants.ErrUserNotSaved
@@ -49,7 +65,6 @@ func (r *UserRepositoryImpl) SaveUser(ctx context.Context, user models.User) err
 	return nil
 }
 
-// GetUserByEmail gets a user from the database by email
 func (r *UserRepositoryImpl) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 
 	var user = models.User{}
