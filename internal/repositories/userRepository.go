@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/gt2rz/micro-auth/internal/constants"
