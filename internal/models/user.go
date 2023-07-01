@@ -10,7 +10,8 @@ type User struct {
 	Lastname             string    `json:"lastname"`
 	Phone                string    `json:"phone"`
 	Verified             bool      `json:"verified"`
+	Status               bool      `json:"status"`
 	PasswordResetTokenAt time.Time `json:"passwordResetTokenAt"`
-	CreatedAt            string    `json:"createdAt"`
-	UpdatedAt            string    `json:"updatedAt"`
+	CreatedAt            time.Time `json:"createdAt"`
+	UpdatedAt            time.Time `json:"updatedAt"`
 }
