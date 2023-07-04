@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/gt2rz/micro-auth/internal/database"
@@ -32,7 +34,7 @@ func NewHttpServer(ctx context.Context) (*HttpServer, error) {
 
 	// Set port server if not set
 	if os.Getenv("PORT") == "" {
-		os.Setenv("PORT", ":3000")
+		os.Setenv("PORT", "3000")
 	}
 
 	// Get port server
@@ -58,10 +60,26 @@ func (server *HttpServer) Start(router func(s *HttpServer, r *mux.Router)) {
 	// Add CORS middleware to server router
 	handlerRoutes := cors.Default().Handler(server.router)
 
+	// Set port server if not set
+	if os.Getenv("APP_ENV") != "production" {
+		port, _ := strconv.Atoi(server.port)
+
+		for {
+			listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+			if err == nil {
+				listener.Close()
+				break
+			}
+			port++
+		}
+
+		server.port = strconv.Itoa(port)
+	}
+
 	fmt.Println("Server listening on port", server.port)
 
 	// Start server on port anf handler routes
-	err := http.ListenAndServe(server.port, handlerRoutes)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", server.port), handlerRoutes)
 	if err != nil {
 		panic(err.Error())
 	}
