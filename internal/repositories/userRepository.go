@@ -94,7 +94,6 @@ func (r *UserRepositoryImpl) GetUserByEmail(ctx context.Context, email string) (
 		&user.Phone,
 		&user.Verified,
 		&user.Status,
-		&user.PasswordResetTokenAt,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)

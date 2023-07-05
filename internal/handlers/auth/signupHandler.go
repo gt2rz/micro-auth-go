@@ -42,10 +42,17 @@ func SignupHandler(server *servers.HttpServer) http.HandlerFunc {
 			return
 		}
 
+		// Generate from the password with a predefined cost
+		hashedPassword, err := utils.HashPassword(request.Password)
+		if err != nil {
+			utils.SendHttpResponseError(w, constants.ErrSignupFailed, http.StatusInternalServerError)
+			return
+		}
+
 		// Create a new user
 		err = server.UserRepository.SaveUser(context.Background(), models.User{
 			Email:     request.Email,
-			Password:  request.Password,
+			Password:  string(hashedPassword),
 			Firstname: request.Firstname,
 			Lastname:  request.Lastname,
 			Phone:     request.Phone,
