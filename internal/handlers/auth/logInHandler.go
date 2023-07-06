@@ -26,7 +26,6 @@ type LoginResponse struct {
 	Email     string `json:"email"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
-	Phone     string `json:"phone"`
 	Token     string `json:"token"`
 	Status    bool   `json:"status"`
 	Message   string `json:"message"`
@@ -51,7 +50,7 @@ func LoginHandler(s *servers.HttpServer) http.HandlerFunc {
 		// Get the user by email
 		user, err := s.UserRepository.GetUserByEmail(context.Background(), request.Email)
 		if err != nil {
-			utils.SendHttpResponseError(w, constants.ErrGettingUser, http.StatusInternalServerError)
+			utils.SendHttpResponseError(w, constants.ErrInvalidCredentials, http.StatusInternalServerError)
 			return
 		}
 
@@ -81,7 +80,7 @@ func LoginHandler(s *servers.HttpServer) http.HandlerFunc {
 		signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 
 		if err != nil {
-			utils.SendHttpResponseError(w, utils.ErrAnErrorOccurred, http.StatusInternalServerError)
+			utils.SendHttpResponseError(w, constants.ErrInvalidCredentials, http.StatusInternalServerError)
 			return
 		}
 
@@ -91,7 +90,6 @@ func LoginHandler(s *servers.HttpServer) http.HandlerFunc {
 			Email:     user.Email,
 			Firstname: user.Firstname,
 			Lastname:  user.Lastname,
-			Phone:     user.Phone,
 			Token:     signedToken,
 			Status:    true,
 			Message:   "Login successful",
