@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/gt2rz/micro-auth/internal/constants"
@@ -34,15 +35,17 @@ func (r *UserRepositoryImpl) SaveUser(ctx context.Context, user models.User) err
 
 	sql := `
 	INSERT INTO users (
+		id,
 		email, 
 		password, 
 		firstname, 
 		lastname, 
 		phone 
-	) VALUES ($1, $2, $3, $4, $5)
+	) VALUES ($1, $2, $3, $4, $5, $6)
 	`
 
 	result, err := r.db.ExecContext(ctx, sql,
+		user.Id,
 		user.Email,
 		user.Password,
 		user.Firstname,
@@ -50,6 +53,7 @@ func (r *UserRepositoryImpl) SaveUser(ctx context.Context, user models.User) err
 		user.Phone,
 	)
 
+	fmt.Println(err)
 	if err != nil {
 		return constants.ErrUserNotSaved
 	}

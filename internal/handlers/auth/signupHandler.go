@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gt2rz/micro-auth/internal/constants"
 	"github.com/gt2rz/micro-auth/internal/models"
 	"github.com/gt2rz/micro-auth/internal/servers"
@@ -49,8 +50,16 @@ func SignupHandler(server *servers.HttpServer) http.HandlerFunc {
 			return
 		}
 
+		// Generate a new UUID
+		id, err := uuid.NewRandom()
+		if err != nil {
+			utils.SendHttpResponseError(w, constants.ErrSignupFailed, http.StatusInternalServerError)
+			return
+		}
+
 		// Create a new user
 		err = server.UserRepository.SaveUser(context.Background(), models.User{
+			Id:        id.String(),
 			Email:     request.Email,
 			Password:  string(hashedPassword),
 			Firstname: request.Firstname,
