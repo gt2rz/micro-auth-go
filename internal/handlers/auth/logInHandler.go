@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"time"
 
@@ -52,7 +51,6 @@ func LoginHandler(s *servers.HttpServer) http.HandlerFunc {
 		// Get the user by email
 		user, err := s.UserRepository.GetUserByEmail(context.Background(), request.Email)
 		if err != nil {
-			fmt.Println(err)
 			utils.SendHttpResponseError(w, constants.ErrGettingUser, http.StatusInternalServerError)
 			return
 		}
@@ -65,7 +63,6 @@ func LoginHandler(s *servers.HttpServer) http.HandlerFunc {
 
 		// Compare the password with the hash
 		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
-		fmt.Println(err)
 		if err != nil {
 			utils.SendHttpResponseError(w, constants.ErrInvalidCredentials, http.StatusUnauthorized)
 			return
