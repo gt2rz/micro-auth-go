@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gt2rz/micro-auth/internal/database"
+	"github.com/gt2rz/micro-auth/internal/events"
 	"github.com/gt2rz/micro-auth/internal/repositories"
 	"github.com/rs/cors"
 )
@@ -20,6 +21,7 @@ type HttpServer struct {
 	port           string
 	router         *mux.Router
 	db             *sql.DB
+	publisher      events.EventConnection
 	UserRepository repositories.UserRepository
 }
 
@@ -40,6 +42,12 @@ func NewHttpServer(ctx context.Context) (*HttpServer, error) {
 	// Get port server
 	port := os.Getenv("PORT")
 
+	// Create new event publisher
+	publisher, err := events.NewRedisPublisher()
+	if err != nil {
+		return nil, err
+	}
+
 	userRepository, _ := repositories.NewUserRepository(db)
 
 	// Create new server
@@ -47,6 +55,7 @@ func NewHttpServer(ctx context.Context) (*HttpServer, error) {
 		port:           port,
 		router:         mux.NewRouter(),
 		db:             db,
+		publisher:      publisher,
 		UserRepository: userRepository,
 	}, nil
 }
