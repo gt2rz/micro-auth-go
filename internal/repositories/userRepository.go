@@ -111,7 +111,6 @@ func (r *UserRepositoryImpl) GetUserByEmail(ctx context.Context, email string) (
 	}
 
 	return &user, nil
-
 }
 
 // GenerateResetToken generates a reset token for a user
@@ -122,7 +121,7 @@ func (r *UserRepositoryImpl) GenerateResetToken(ctx context.Context, id string) 
 		return "", constants.ErrGenerateRandomString
 	}
 
-	result, err := r.db.ExecContext(ctx, "UPDATE users SET password_reset_token=?, password_reset_token_at=? WHERE id=?", resetToken, resetTokenAt, id)
+	result, err := r.db.ExecContext(ctx, "UPDATE users SET password_reset_token=$1, password_reset_token_at=$2 WHERE id=$3", resetToken, resetTokenAt, id)
 	if err != nil {
 		return "", constants.ErrResetTokenNotSaved
 	}
@@ -143,7 +142,7 @@ func (r *UserRepositoryImpl) GenerateResetToken(ctx context.Context, id string) 
 func (r *UserRepositoryImpl) GetUserByResetToken(ctx context.Context, resetToken string) (*models.User, error) {
 	var user = models.User{}
 
-	query := r.db.QueryRowContext(ctx, "SELECT id, email, first_name, password_reset_token_at  FROM users WHERE password_reset_token=?", resetToken)
+	query := r.db.QueryRowContext(ctx, "SELECT id, email, first_name, password_reset_token_at  FROM users WHERE password_reset_token=$1", resetToken)
 	err := query.Scan(&user.Id, &user.Email, &user.Firstname, &user.PasswordResetTokenAt)
 	if err == sql.ErrNoRows {
 		return nil, constants.ErrUserNotFound
@@ -158,7 +157,7 @@ func (r *UserRepositoryImpl) GetUserByResetToken(ctx context.Context, resetToken
 
 // UpdatePassword updates a user's password
 func (r *UserRepositoryImpl) UpdatePassword(ctx context.Context, id string, password string) error {
-	result, err := r.db.ExecContext(ctx, "UPDATE users SET password=? WHERE id=?", password, id)
+	result, err := r.db.ExecContext(ctx, "UPDATE users SET password=$1 WHERE id=$2", password, id)
 
 	if err != nil {
 		return utils.ErrAnErrorOccurred
