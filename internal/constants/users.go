@@ -13,3 +13,5 @@ var ErrResetTokenNotSaved = errors.New("Reset token not saved")
 var ErrUserAlreadyExists = errors.New("User already exists")
 
 var ErrGettingUser = errors.New("Error getting user")
+
+var ErrResetTokenExpired = errors.New("Reset token expired")

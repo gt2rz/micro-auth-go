@@ -142,7 +142,7 @@ func (r *UserRepositoryImpl) GenerateResetToken(ctx context.Context, id string) 
 func (r *UserRepositoryImpl) GetUserByResetToken(ctx context.Context, resetToken string) (*models.User, error) {
 	var user = models.User{}
 
-	query := r.db.QueryRowContext(ctx, "SELECT id, email, first_name, password_reset_token_at  FROM users WHERE password_reset_token=$1", resetToken)
+	query := r.db.QueryRowContext(ctx, "SELECT id, email, firstname, password_reset_token_at  FROM users WHERE password_reset_token=$1", resetToken)
 	err := query.Scan(&user.Id, &user.Email, &user.Firstname, &user.PasswordResetTokenAt)
 	if err == sql.ErrNoRows {
 		return nil, constants.ErrUserNotFound
