@@ -22,7 +22,7 @@ type SignupRequest struct {
 
 type SignupResponse struct {
 	Status  bool   `json:"status"`
-	Id      int    `json:"id"`
+	Id      string `json:"id"`
 	Message string `json:"message"`
 }
 
@@ -96,7 +96,7 @@ func SignupHandler(server *servers.HttpServer) http.HandlerFunc {
 		// Send the response
 		utils.SendHttpResponse(w, SignupResponse{
 			Status:  constants.Success,
-			Id:      1,
+			Id:      newUser.Id,
 			Message: constants.UserCreatedSuccessfully,
 		}, http.StatusCreated)
 	}
