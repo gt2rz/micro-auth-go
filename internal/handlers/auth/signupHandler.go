@@ -26,6 +26,14 @@ type SignupResponse struct {
 	Message string `json:"message"`
 }
 
+type SignupCreateEvent struct {
+	Type      string `json:"type"` // signup.create
+	Email     string `json:"email"`
+	Firstname string `json:"first_name"`
+	Lastname  string `json:"last_name"`
+	Phone     string `json:"phone"`
+}
+
 func SignupHandler(server *servers.HttpServer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request = SignupRequest{}
@@ -57,20 +65,33 @@ func SignupHandler(server *servers.HttpServer) http.HandlerFunc {
 			return
 		}
 
-		// Create a new user
-		err = server.UserRepository.SaveUser(context.Background(), models.User{
+		newUser := models.User{
 			Id:        id.String(),
 			Email:     request.Email,
 			Password:  string(hashedPassword),
 			Firstname: request.Firstname,
 			Lastname:  request.Lastname,
 			Phone:     request.Phone,
-		})
+		}
+
+		// Create a new user
+		err = server.UserRepository.SaveUser(context.Background(), newUser)
 
 		if err != nil {
 			utils.SendHttpResponseError(w, constants.ErrSignupFailed, http.StatusBadRequest)
 			return
 		}
+
+		// Publish the event
+		payload := SignupCreateEvent{
+			Type:      constants.Event_signup_create_success,
+			Email:     newUser.Email,
+			Firstname: newUser.Firstname,
+			Lastname:  newUser.Lastname,
+			Phone:     newUser.Phone,
+		}
+		newUserString := utils.StructToJsonString(payload)
+		server.Publisher.Publish(context.Background(), constants.Channel_signup_create, newUserString)
 
 		// Send the response
 		utils.SendHttpResponse(w, SignupResponse{

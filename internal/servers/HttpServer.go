@@ -21,7 +21,7 @@ type HttpServer struct {
 	port           string
 	router         *mux.Router
 	db             *sql.DB
-	publisher      events.EventConnection
+	Publisher      events.EventConnection
 	UserRepository repositories.UserRepository
 }
 
@@ -55,7 +55,7 @@ func NewHttpServer(ctx context.Context) (*HttpServer, error) {
 		port:           port,
 		router:         mux.NewRouter(),
 		db:             db,
-		publisher:      publisher,
+		Publisher:      publisher,
 		UserRepository: userRepository,
 	}, nil
 }
